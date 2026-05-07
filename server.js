@@ -231,7 +231,10 @@ app.post('/api/token', async (_req, res) => {
         'Content-Type': 'application/json',
         'eformsign_signature': eformsignSignature,
       },
-      body: JSON.stringify({ execution_time: executionTime }),
+      body: JSON.stringify({
+      execution_time: executionTime,
+      ...(process.env.EFORMSIGN_MEMBER_ID && { member_id: process.env.EFORMSIGN_MEMBER_ID }),
+    }),
     });
 
     const tokenData = await tokenRes.json();
