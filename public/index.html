@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>六合國際 電子要保書系統</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://www.eformsign.com/plugins/jquery/jquery.min.js"></script>
+<script src="https://www.eformsign.com/lib/js/efs_embedded_v2.js"></script>
+
+<style>
+:root {
+  --red:        #C0392B;
+  --red-dark:   #96281B;
+  --red-light:  #E74C3C;
+  --red-faint:  #FDEDEC;
+  --gold:       #D4AC0D;
+  --gold-light: #F9E79F;
+  --ink:        #1A1A2E;
+  --ink-mid:    #2C3E50;
+  --ink-soft:   #5D6D7E;
+  --paper:      #FDFCFA;
+  --paper-dark: #F5F0EA;
+  --border:     #E8E0D5;
+  --green:      #27AE60;
+  --green-faint:#D5F5E3;
+  --orange:     #E67E22;
+  --orange-faint:#FDEBD0;
+  --shadow-sm:  0 2px 8px rgba(26,26,46,0.08);
+  --shadow-md:  0 4px 16px rgba(26,26,46,0.12);
+  --shadow-lg:  0 8px 32px rgba(26,26,46,0.16);
+  --r:          14px;
+  --r-sm:       8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font-family: 'Noto Sans TC', sans-serif; font-size: 15px; line-height: 1.6; }
+
+/* ── APP SHELL ── */
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+/* ── HEADER ── */
+.hdr {
+  background: var(--ink);
+  color: #fff;
+  padding: 0 20px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+}
+.hdr-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.hdr-logo .mark {
+  width: 34px; height: 34px;
+  background: var(--red);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+  letter-spacing: -1px;
+}
+.hdr-logo .name { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+.hdr-logo .sub  { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+.hdr-right { display: flex; align-items: center; gap: 12px; }
+.hdr-agent { text-align: right; }
+.hdr-agent .agent-name { font-size: 13px; font-weight: 500; }
+.hdr-agent .agent-id   { font-size: 10px; color: rgba(255,255,255,0.5); }
+.hdr-back {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  display: none;
+}
+.hdr-back.visible { display: flex; align-items: center; gap: 6px; }
+.lang-toggle {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.lang-toggle:hover { background: rgba(255,255,255,0.22); }
+
+/* ── STEP BAR ── */
+.step-bar {
+  background: var(--paper-dark);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: none;
+  flex-shrink: 0;
+}
+.step-bar.visible { display: flex; }
+.steps { display: flex; align-items: center; gap: 0; width: 100%; }
+.step {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--ink-soft); font-weight: 400;
+  flex: 1;
+}
+.step .dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--border);
+  color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+}
+.step.active .dot { background: var(--red); color: #fff; }
+.step.done .dot   { background: var(--green); color: #fff; }
+.step.active      { color: var(--ink); font-weight: 600; }
+.step.done        { color: var(--green); }
+.step-line { flex: 1; height: 1px; background: var(--border); margin: 0 4px; }
+.step-line.done { background: var(--green); }
+
+/* ── SCROLLABLE BODY ── */
+.body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── VIEWS ── */
+.view { display: none; padding: 20px; min-height: 100%; }
+.view.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: #fff;
+  border-radius: var(--r);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.card-hd {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-hd .icon { font-size: 18px; }
+.card-hd h3 { font-size: 15px; font-weight: 700; color: var(--ink); }
+.card-hd .sub { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+.card-bd { padding: 16px 18px; }
+
+/* ── STAT BOXES ── */
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-box {
+  background: #fff;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-box .num   { font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-box .label { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+.stat-box.pending .num { color: var(--red); }
+.stat-box.done    .num { color: var(--green); }
+.stat-box.renewal .num { color: var(--orange); }
+
+/* ── ALERT ITEMS ── */
+.alert-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-badge {
+  background: var(--orange-faint);
+  color: var(--orange);
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+  white-space: nowrap;
+}
+.alert-badge.urgent { background: var(--red-faint); color: var(--red); }
+.alert-info { flex: 1; }
+.alert-info .name { font-size: 14px; font-weight: 600; }
+.alert-info .detail { font-size: 12px; color: var(--ink-soft); }
+
+/* ── PENDING SIGN ITEMS ── */
+.pending-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.pending-item:last-child { border-bottom: none; }
+.pending-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+.pending-dot.sent { background: var(--orange); }
+.pending-info { flex: 1; }
+.pending-info .name { font-size: 14px; font-weight: 600; }
+.pending-info .meta { font-size: 12px; color: var(--ink-soft); }
+.pending-time { font-size: 11px; color: var(--ink-soft); font-family: 'DM Mono', monospace; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 15px 20px;
+  border: none; border-radius: var(--r-sm);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--red-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary:disabled { background: var(--border); color: var(--ink-soft); cursor: not-allowed; }
+.btn-secondary { background: var(--paper-dark); color: var(--ink-mid); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--border); }
+.btn + .btn { margin-top: 10px; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── SEARCH BOX ── */
+.search-wrap { display: flex; gap: 10px; margin-bottom: 4px; }
+.input-field {
+  flex: 1; padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 15px; font-family: inherit;
+  background: #fff; color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-field:focus { border-color: var(--red); }
+.btn-search {
+  padding: 13px 18px;
+  background: var(--ink); color: #fff;
+  border: none; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  white-space: nowrap;
+}
+
+/* ── INFO GRID ── */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; background: var(--paper-dark);
+  border-radius: var(--r-sm); padding: 14px; margin-bottom: 14px;
+}
+.info-item .lbl { font-size: 10px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.info-item .val { font-size: 13px; font-weight: 600; color: var(--ink); }
+.info-item.full { grid-column: 1 / -1; }
+
+/* ── DOC TYPE CARDS ── */
+.doc-grid { display: flex; flex-direction: column; gap: 10px; }
+.doc-card {
+  border: 2px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+  display: flex; align-items: center; gap: 14px;
+}
+.doc-card:hover { border-color: var(--red-light); }
+.doc-card.selected { border-color: var(--red); background: var(--red-faint); }
+.doc-card .doc-icon { font-size: 28px; flex-shrink: 0; }
+.doc-card .doc-info h4 { font-size: 15px; font-weight: 700; color: var(--ink); }
+.doc-card .doc-info .doc-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.doc-card .check { margin-left: auto; font-size: 20px; color: var(--red); display: none; }
+.doc-card.selected .check { display: block; }
+
+/* ── INSURER CHIPS ── */
+.insurer-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.insurer-chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+  background: #fff;
+}
+.insurer-chip:hover { border-color: var(--red-light); }
+.insurer-chip.selected { border-color: var(--red); background: var(--red-faint); color: var(--red); font-weight: 700; }
+
+/* ── SIGNING MODE CARDS ── */
+.mode-grid { display: flex; flex-direction: column; gap: 12px; }
+.mode-card {
+  border: 2px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+}
+.mode-card:hover { border-color: var(--ink-mid); box-shadow: var(--shadow-sm); }
+.mode-card .mode-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.mode-card .mode-icon { font-size: 32px; }
+.mode-card .mode-title { font-size: 16px; font-weight: 700; }
+.mode-card .mode-title-sub { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+.mode-card .mode-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.mode-card .mode-btn {
+  margin-top: 14px;
+  padding: 11px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px; font-weight: 700;
+  border: none; cursor: pointer; font-family: inherit;
+  width: 100%;
+}
+.mode-card.local .mode-btn  { background: var(--red); color: #fff; }
+.mode-card.remote .mode-btn { background: var(--ink); color: #fff; }
+
+/* ── REMOTE LINK DISPLAY ── */
+.link-box {
+  background: var(--paper-dark);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.link-url {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-mid);
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.copy-btn {
+  padding: 7px 14px;
+  background: var(--ink); color: #fff;
+  border: none; border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.share-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.share-btn {
+  padding: 10px 8px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  text-align: center;
+}
+.share-btn .s-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+.waiting-status {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--gold-light);
+  border: 1px solid var(--gold);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.waiting-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); flex-shrink: 0; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+/* ── EFORMSIGN VIEW ── */
+#eformsign-view { padding: 0; display: none; flex-direction: column; height: 100%; }
+#eformsign-view.active { display: flex; }
+.efs-frame { flex: 1; border: none; width: 100%; min-height: 0; }
+.efs-placeholder {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 40px 20px; text-align: center;
+}
+.efs-placeholder .big-icon { font-size: 56px; }
+.efs-placeholder h3 { font-size: 18px; font-weight: 700; }
+.efs-placeholder p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+.efs-placeholder .api-hint {
+  background: var(--paper-dark); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 14px 16px;
+  font-size: 12px; text-align: left; width: 100%; max-width: 340px;
+  font-family: 'DM Mono', monospace; color: var(--ink-mid);
+  line-height: 1.8;
+}
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  background: var(--gold-light); color: var(--ink-mid);
+}
+.status-pill.done { background: var(--green-faint); color: var(--green); }
+.status-pill.error { background: var(--red-faint); color: var(--red); }
+
+/* ── WEBHOOK LOG ── */
+.webhook-entry {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.webhook-entry .wh-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  color: var(--green); background: var(--green-faint);
+  padding: 2px 8px; border-radius: 4px;
+  display: inline-block; margin-bottom: 8px;
+}
+.webhook-entry .wh-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.webhook-entry .wh-label { font-size: 11px; color: var(--ink-soft); }
+.webhook-entry .wh-val   { font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.archive-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px;
+  margin-top: 8px;
+}
+.archive-tag.pending { background: var(--gold-light); color: var(--orange); }
+.archive-tag.success { background: var(--green-faint); color: var(--green); }
+
+/* ── COMPLETE MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.7);
+  z-index: 500; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-sheet {
+  background: #fff;
+  border-radius: var(--r) var(--r) 0 0;
+  padding: 28px 24px 40px;
+  width: 100%; max-width: 480px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-check { font-size: 52px; text-align: center; margin-bottom: 12px; }
+.modal-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.modal-sub   { font-size: 14px; color: var(--ink-soft); text-align: center; margin-bottom: 20px; }
+.modal-info  { background: var(--paper-dark); border-radius: var(--r-sm); padding: 14px; margin-bottom: 20px; }
+.modal-row   { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.modal-row:last-child { border-bottom: none; }
+.modal-row .mk { font-size: 12px; color: var(--ink-soft); }
+.modal-row .mv { font-size: 13px; font-weight: 600; }
+
+/* ── CONFIG PANEL ── */
+.config-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; cursor: pointer;
+}
+.config-panel { display: none; padding-top: 12px; }
+.config-panel.open { display: block; }
+.config-row { margin-bottom: 10px; }
+.config-row label { font-size: 11px; color: var(--ink-soft); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.config-row input {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 12px; font-family: 'DM Mono', monospace;
+  outline: none; color: var(--ink);
+}
+.config-row input:focus { border-color: var(--red); }
+
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 32px 20px; color: var(--ink-soft); }
+.empty .e-icon { font-size: 36px; margin-bottom: 10px; }
+.empty p { font-size: 14px; }
+
+/* ── LOADING ── */
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── QUICK ACTION ── */
+.fab {
+  position: fixed; bottom: 28px; right: 20px;
+  width: 56px; height: 56px;
+  background: var(--red); color: #fff;
+  border-radius: 50%; border: none;
+  font-size: 24px; cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  transition: transform 0.15s;
+}
+.fab:hover { transform: scale(1.08); }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink-soft); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── RESPONSIVE ── */
+@media (min-width: 480px) {
+  .view { padding: 24px; max-width: 480px; margin: 0 auto; }
+  #eformsign-view { max-width: none; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="hdr" id="hdr">
+    <div class="hdr-logo">
+      <div class="mark">六合</div>
+      <div>
+        <div class="name" id="hdrAppNameEl">六合國際電子要保書</div>
+        <div class="sub" id="hdrAppSubEl">Liu Ho eSign System</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLang()">EN</button>
+      <button class="hdr-back" id="hdrBack" onclick="goBack()">← 返回</button>
+      <div class="hdr-agent" id="hdrAgent">
+        <div class="agent-name" id="agentName">-</div>
+        <div class="agent-id" id="agentId">-</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- STEP BAR -->
+  <div class="step-bar" id="stepBar">
+    <div class="steps">
+      <div class="step" id="step1"><div class="dot">1</div><span>查詢</span></div>
+      <div class="step-line" id="line1"></div>
+      <div class="step" id="step2"><div class="dot">2</div><span>文件</span></div>
+      <div class="step-line" id="line2"></div>
+      <div class="step" id="step3"><div class="dot">3</div><span>簽署</span></div>
+      <div class="step-line" id="line3"></div>
+      <div class="step" id="step4"><div class="dot">4</div><span>完成</span></div>
+    </div>
+  </div>
+
+  <!-- SCROLLABLE BODY -->
+  <div class="body" id="mainBody">
+
+    <!-- VIEW: DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+
+      <div class="stat-row">
+        <div class="stat-box pending">
+          <div class="num" id="statPending">3</div>
+          <div class="label" id="statLabelPendingEl">待簽署</div>
+        </div>
+        <div class="stat-box done">
+          <div class="num" id="statDone">12</div>
+          <div class="label" id="statLabelDoneEl">今日完成</div>
+        </div>
+        <div class="stat-box renewal">
+          <div class="num">2</div>
+          <div class="label" id="statLabelRenewalEl">續保提醒</div>
+        </div>
+      </div>
+
+      <!-- 갱신 알림 (목업) -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="icon">⚠️</span>
+          <div>
+            <h3>續保提醒</h3>
+            <div class="sub">即將到期的保單</div>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="alert-item">
+            <div>
+              <div style="font-size:14px;font-weight:600;" id="alert1Name">王小明</div>
+              <div style="font-size:12px;color:var(--ink-soft);" id="alert1Detail">ABC-1234 · 新光火災</div>
+            </div>
+            <div style="margin-left:auto;"><span class="alert-badge urgent">D-7</span></div>
+          </div>
+          <div class="alert-item">
+            <div>
+              <div style="font-size:14px;font-weight:600;" id="alert2Name">李美玲</div>
+              <div style="font-size:12px;color:var(--ink-soft);" id="alert2Detail">XYZ-5678 · 明台產險</div>
+            </div>
+            <div style="margin-left:auto;"><span class="alert-badge">D-14</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 서명 대기 목록 (웹훅 연동) -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="icon">📋</span>
+          <div>
+            <h3>待簽署清單</h3>
+            <div class="sub">遠端簽署進度追蹤</div>
+          </div>
+        </div>
+        <div class="card-bd" id="pendingList">
+          <div class="pending-item">
+            <div class="pending-dot"></div>
+            <div class="pending-info">
+              <div class="name" id="pending1Name">陳大華 · 新保要保書</div>
+              <div class="meta" id="pending1Meta">新光火災 · 已發送 Line</div>
+            </div>
+            <div class="pending-time" id="pending1Time">3小時前</div>
+          </div>
+          <div class="pending-item">
+            <div class="pending-dot sent"></div>
+            <div class="pending-info">
+              <div class="name" id="pending2Name">林翠芬 · 續保要保書</div>
+              <div class="meta" id="pending2Meta">富邦產險 · 已發送 Email</div>
+            </div>
+            <div class="pending-time" id="pending2Time">昨天</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 웹훅 이벤트 로그 -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="icon">📡</span>
+          <div>
+            <h3>簽署完成記錄</h3>
+            <div class="sub">Webhook 即時接收</div>
+          </div>
+        </div>
+        <div class="card-bd" id="webhookLog">
+          <div class="empty"><div class="e-icon">📭</div><p>尚無完成記錄<br>完成簽署後將即時顯示</p></div>
+        </div>
+      </div>
+
+      <div style="height:80px;"></div>
+    </div>
+
+    <!-- VIEW: CUSTOMER SEARCH -->
+    <div class="view" id="view-search">
+      <div class="section-label" id="searchSectionLabel">步驟 1 · 客戶查詢</div>
+      <div class="card">
+        <div class="card-hd">
+          <span class="icon">🔍</span>
+          <div><h3 id="searchCardTitle">查詢客戶資料</h3><div class="sub" id="searchCardSub">輸入保單號碼或客戶姓名</div></div>
+        </div>
+        <div class="card-bd">
+          <div class="search-wrap">
+            <input class="input-field" id="searchInput" placeholder="P-2024-08821 / 陳大華" onkeydown="if(event.key==='Enter')searchCustomer()">
+            <button class="btn-search" id="searchBtn" onclick="searchCustomer()">查詢</button>
+          </div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;" id="searchHint">
+            Demo: P-2024-08821 · P-2025-03341 · P-2025-07789
+          </div>
+        </div>
+      </div>
+
+      <div id="searchResult" style="display:none;">
+        <div class="section-label" id="searchResultLabel">查詢結果</div>
+        <div class="card" id="customerCard"></div>
+        <button class="btn btn-primary" id="searchNextBtn" onclick="goToDocSelect()">下一步 · 選擇文件 →</button>
+      </div>
+    </div>
+
+    <!-- VIEW: DOC SELECT -->
+    <div class="view" id="view-docselect">
+      <div class="section-label" id="docSectionLabel">步驟 2 · 選擇要保書</div>
+      <div class="card">
+        <div class="card-hd"><span class="icon">📄</span><div><h3 id="docTypeTitle">要保書類型</h3></div></div>
+        <div class="card-bd">
+          <div class="doc-grid" id="docGrid">
+            <div class="doc-card" id="doc-new" onclick="selectDoc('new')">
+              <div class="doc-icon">🆕</div>
+              <div class="doc-info">
+                <h4 id="docNewTitle">新保要保書</h4>
+                <div class="doc-sub" id="docNewSub">保險公司報價 → 轉換為六合要保書</div>
+              </div>
+              <div class="check">✓</div>
+            </div>
+            <div class="doc-card" id="doc-renewal" onclick="selectDoc('renewal')">
+              <div class="doc-icon">🔄</div>
+              <div class="doc-info">
+                <h4 id="docRenewalTitle">續保要保書</h4>
+                <div class="doc-sub" id="docRenewalSub">系統自動帶入現有保單資料</div>
+              </div>
+              <div class="check">✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="icon">🏢</span><div><h3 id="insurerTitle">保險公司</h3></div></div>
+        <div class="card-bd">
+          <div class="insurer-row" id="insurerRow">
+            <div class="insurer-chip" onclick="selectInsurer(this)" data-val="新光火災">新光火災</div>
+            <div class="insurer-chip" onclick="selectInsurer(this)" data-val="富邦產險">富邦產險</div>
+            <div class="insurer-chip" onclick="selectInsurer(this)" data-val="國泰世紀">國泰世紀</div>
+            <div class="insurer-chip" onclick="selectInsurer(this)" data-val="明台產險">明台產險</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API 설정 패널 -->
+      <div class="card">
+        <div class="card-bd">
+          <div class="config-toggle" onclick="toggleConfig()">
+            <span style="font-size:13px;font-weight:600;" id="configTitle">⚙️ eformsign API 設定</span>
+            <span id="configArrow" style="font-size:12px;color:var(--ink-soft);">▼ 展開</span>
+          </div>
+          <div class="config-panel" id="configPanel">
+            <div class="config-row">
+              <label>Service Domain</label>
+              <input id="cfgServiceDomain" value="https://sg.eformsign.com">
+            </div>
+            <div class="config-row">
+              <label>Company ID</label>
+              <input id="cfgCompanyId" value="0605ef552c694a96b32738093b8ce8a2">
+            </div>
+            <div class="config-row">
+              <label>Template ID</label>
+              <input id="cfgTemplateId" value="2827d85e6add4d08917691eacf958580">
+            </div>
+            <div class="config-row">
+              <label>Language</label>
+              <input id="cfgLang" value="zh-TW">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btnDocNext" onclick="goToSignMode()" disabled id="docNextBtn">下一步 · 選擇簽署方式 →</button>
+    </div>
+
+    <!-- VIEW: SIGN MODE -->
+    <div class="view" id="view-signmode">
+      <div class="section-label" id="signSectionLabel">步驟 3 · 簽署方式</div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-bd">
+          <div class="info-grid" id="summaryGrid"></div>
+        </div>
+      </div>
+      <div class="mode-grid">
+        <div class="mode-card local">
+          <div class="mode-top">
+            <div class="mode-icon">📱</div>
+            <div>
+              <div class="mode-title" id="localModeTitle">現場簽署</div>
+              <div class="mode-title-sub" id="localModeSub">Face-to-Face Signing</div>
+            </div>
+          </div>
+          <div class="mode-desc" id="localModeDesc">業務員與客戶面對面<br>客戶直接在此裝置上親簽</div>
+          <button class="mode-btn" id="localModeBtn" onclick="startLocalSign()">立即現場簽署</button>
+        </div>
+        <div class="mode-card remote">
+          <div class="mode-top">
+            <div class="mode-icon">📧</div>
+            <div>
+              <div class="mode-title" id="remoteModeTitle">遠端簽署</div>
+              <div class="mode-title-sub" id="remoteModeSub">Remote Link Signing</div>
+            </div>
+          </div>
+          <div class="mode-desc" id="remoteModeDesc">產生簽署連結<br>透過 Line / SMS / Email 發送給客戶</div>
+          <button class="mode-btn" id="remoteModeBtn" onclick="startRemoteSign()">產生簽署連結</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: REMOTE LINK -->
+    <div class="view" id="view-remote">
+      <div class="section-label" id="remoteSectionLabel">步驟 3 · 遠端簽署連結</div>
+
+      <div id="remoteLoading" style="text-align:center;padding:40px 0;">
+        <div class="spinner" style="margin:0 auto 16px;"></div>
+        <div style="font-size:14px;color:var(--ink-soft);" id="remoteLoadingMsg">正在產生簽署連結...</div>
+      </div>
+
+      <div id="remoteLinkContent" style="display:none;">
+        <div class="card">
+          <div class="card-hd"><span class="icon">🔗</span><div><h3 id="remoteLinkTitle">簽署連結已產生</h3><div class="sub" id="remoteDocName"></div></div></div>
+          <div class="card-bd">
+            <div class="link-box">
+              <div class="link-url" id="remoteUrl">-</div>
+              <button class="copy-btn" id="remoteCopyBtnEl" onclick="copyLink()">📋 複製連結</button>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--ink-mid);" id="remoteSendLabel">發送方式</div>
+            <div class="share-row">
+              <div class="share-btn" onclick="shareVia('line')"><span class="s-icon">💬</span>LINE</div>
+              <div class="share-btn" onclick="shareVia('sms')"><span class="s-icon">📱</span>SMS</div>
+              <div class="share-btn" onclick="shareVia('email')"><span class="s-icon">📧</span>Email</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="waiting-status" id="waitingStatus">
+          <div class="waiting-pulse"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;" id="remoteWaitingText">等待客戶簽署中...</div>
+            <div style="font-size:11px;color:var(--ink-mid);" id="remoteWaitingSub">簽署完成後將自動通知</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><span class="icon">🔐</span><div><h3 id="remoteAuthTitle">身份驗證設定</h3><div class="sub" id="remoteAuthSub">由 eformsign 管理</div></div></div>
+          <div class="card-bd">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                <span style="color:var(--green);font-size:16px;">✓</span>
+                <span id="remoteAuth1">Email OTP 驗證 (eformsign 內建)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                <span style="color:var(--green);font-size:16px;">✓</span>
+                <span id="remoteAuth2">IP / 裝置 / 時間戳記錄</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                <span style="color:var(--green);font-size:16px;">✓</span>
+                <span id="remoteAuth3">稽核追蹤憑證自動產生</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" id="remoteDashBtn" onclick="showView('view-dashboard')">← 返回儀表板</button>
+      </div>
+    </div>
+
+    <!-- VIEW: WEBHOOK LOG (상세) -->
+    <div class="view" id="view-webhook">
+      <div class="section-label">Webhook 事件記錄</div>
+      <div id="webhookDetailLog"></div>
+      <button class="btn btn-secondary" onclick="showView('view-dashboard')">← 返回</button>
+    </div>
+
+  </div><!-- /mainBody -->
+
+  <!-- EFORMSIGN VIEW (현장 서명) -->
+  <div id="eformsign-view">
+    <div class="efs-placeholder" id="efsPlaceholder">
+      <div class="big-icon">📝</div>
+      <h3 id="efsTitle">要保書電子簽署</h3>
+      <p id="efsSubtitle">正在載入 eformsign...</p>
+      <div class="spinner" id="efsSpinner"></div>
+      <div class="api-hint" id="efsHint" style="display:none;"></div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;" id="efsBtns" style="display:none;">
+        <button class="btn btn-primary" id="efsSimBtn" onclick="simulateSign()">✓ 模擬完成簽署 (Demo)</button>
+        <button class="btn btn-secondary" id="efsBackBtn" onclick="exitEformsign()">← 返回</button>
+      </div>
+    </div>
+    <div id="efsContainer" style="display:none;flex:1;overflow:hidden;"></div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fab" onclick="goToNewPolicy()">＋</button>
+
+  <!-- COMPLETE MODAL -->
+  <div class="modal-overlay" id="completeModal">
+    <div class="modal-sheet">
+      <div class="modal-check">✅</div>
+      <div class="modal-title" id="modalTitle">簽署完成！</div>
+      <div class="modal-sub" id="modalSub">要保書已成功完成電子簽署</div>
+      <div class="modal-info" id="modalInfo"></div>
+      <button class="btn btn-primary" id="modalCloseBtn" onclick="closeModal()">返回儀表板</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  agent: { id: 'A001', name: '張設計師', dept: '北區業務一部' },
+  selectedPolicy: null,
+  selectedDocType: null,
+  selectedInsurer: null,
+  signingUrl: null,
+  completedDocs: 0,
+};
+
+// ============================================================
+// MOCK DATA
+// ============================================================
+const mockPolicies = [
+  {
+    policy_id: 'P-2024-08821',
+    type: 'new',
+    customer: { name: '陳大華', name_en: 'Chen Da-Hua', id_number: 'A223456789', birth_date: '1985-03-22', phone: '0912-345-678', email: 'chen@gmail.com' },
+    vehicle:  { plate: 'ABC-1234', make: 'Toyota', model: 'RAV4', year: 2022 },
+    insurer: '新光火災', premium: 28500,
+    coverage_start: '2026-05-01', coverage_end: '2027-04-30',
+  },
+  {
+    policy_id: 'P-2025-03341',
+    type: 'renewal',
+    customer: { name: '林翠芬', name_en: 'Lin Tsui-Fen', id_number: 'F112345678', birth_date: '1978-11-05', phone: '0935-678-901', email: 'lin@gmail.com' },
+    vehicle:  { plate: 'XYZ-5678', make: 'Honda', model: 'CR-V', year: 2020 },
+    insurer: '富邦產險', premium: 22800,
+    coverage_start: '2026-06-01', coverage_end: '2027-05-31',
+  },
+  {
+    policy_id: 'P-2025-07789',
+    type: 'renewal',
+    customer: { name: '王建民', name_en: 'Wang Chien-Ming', id_number: 'E098765432', birth_date: '1990-07-21', phone: '0968-234-567', email: 'wang@gmail.com' },
+    vehicle:  { plate: 'DEF-9012', make: 'Mazda', model: 'CX-5', year: 2021 },
+    insurer: '國泰世紀', premium: 31200,
+    coverage_start: '2026-04-15', coverage_end: '2027-04-14',
+  },
+];
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('agentName').textContent = state.agent.name;
+  document.getElementById('agentId').textContent = state.agent.id + ' · ' + state.agent.dept;
+  initSSE();
+});
+
+// ============================================================
+// VIEW NAVIGATION
+// ============================================================
+const viewHistory = [];
+let currentView = 'view-dashboard';
+
+function showView(viewId, pushHistory = true) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('eformsign-view').classList.remove('active');
+
+  const el = document.getElementById(viewId);
+  if (!el) return;
+  el.classList.add('active');
+
+  if (pushHistory && currentView !== viewId) viewHistory.push(currentView);
+  currentView = viewId;
+
+  // 헤더 back 버튼
+  const backBtn = document.getElementById('hdrBack');
+  backBtn.classList.toggle('visible', viewHistory.length > 0 && viewId !== 'view-dashboard');
+
+  // Step bar
+  const stepViews = ['view-search','view-docselect','view-signmode','view-remote'];
+  const showStep = stepViews.includes(viewId);
+  document.getElementById('stepBar').classList.toggle('visible', showStep);
+
+  if (showStep) updateStepBar(viewId);
+
+  // FAB
+  document.getElementById('fab').style.display = viewId === 'view-dashboard' ? 'flex' : 'none';
+}
+
+function updateStepBar(viewId) {
+  const map = { 'view-search': 1, 'view-docselect': 2, 'view-signmode': 3, 'view-remote': 3 };
+  const current = map[viewId] || 1;
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById('step' + i);
+    s.classList.remove('active', 'done');
+    if (i < current) s.classList.add('done');
+    else if (i === current) s.classList.add('active');
+    if (i < 4) {
+      const l = document.getElementById('line' + i);
+      l.classList.toggle('done', i < current);
+    }
+  }
+}
+
+function goBack() {
+  if (viewHistory.length > 0) {
+    const prev = viewHistory.pop();
+    showView(prev, false);
+  }
+}
+
+function goToNewPolicy() {
+  state.selectedPolicy = null;
+  state.selectedDocType = null;
+  state.selectedInsurer = null;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResult').style.display = 'none';
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.insurer-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btnDocNext').disabled = true;
+  viewHistory.length = 0;
+  showView('view-search', false);
+}
+
+// ============================================================
+// STEP 1: 고객 조회
+// ============================================================
+function searchCustomer() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return;
+
+  const found = mockPolicies.find(p =>
+    p.policy_id.toLowerCase() === q ||
+    p.customer.name.includes(q) ||
+    p.customer.name_en.toLowerCase().includes(q)
+  );
+
+  const resultEl = document.getElementById('searchResult');
+  const cardEl   = document.getElementById('customerCard');
+
+  if (found) {
+    state.selectedPolicy = found;
+    const c = found.customer;
+    const v = found.vehicle;
+    cardEl.innerHTML = `
+      <div class="card-hd">
+        <span class="icon">👤</span>
+        <div><h3>${c.name} <span style="font-size:12px;font-weight:400;color:var(--ink-soft);">${c.name_en}</span></h3>
+        <div class="sub">${found.policy_id}</div></div>
+      </div>
+      <div class="card-bd">
+        <div class="info-grid">
+          <div class="info-item"><div class="lbl">身分證號</div><div class="val">${c.id_number}</div></div>
+          <div class="info-item"><div class="lbl">生年月日</div><div class="val">${c.birth_date}</div></div>
+          <div class="info-item"><div class="lbl">聯絡電話</div><div class="val">${c.phone}</div></div>
+          <div class="info-item"><div class="lbl">Email</div><div class="val" style="font-size:11px;">${c.email}</div></div>
+          <div class="info-item"><div class="lbl">車牌號碼</div><div class="val">${v.plate}</div></div>
+          <div class="info-item"><div class="lbl">車輛</div><div class="val">${v.make} ${v.model} (${v.year})</div></div>
+          <div class="info-item"><div class="lbl">保單類型</div><div class="val" style="color:var(--red);">${found.type === 'new' ? '新保' : '續保'}</div></div>
+          <div class="info-item"><div class="lbl">保險公司</div><div class="val">${found.insurer}</div></div>
+        </div>
+      </div>
+    `;
+    resultEl.style.display = 'block';
+
+    // 조회된 보험사 자동 선택
+    document.querySelectorAll('.insurer-chip').forEach(chip => {
+      if (chip.dataset.val === found.insurer) chip.classList.add('selected');
+      else chip.classList.remove('selected');
+    });
+    state.selectedInsurer = found.insurer;
+
+    // 계약 타입 자동 선택
+    selectDoc(found.type);
+
+  } else {
+    cardEl.innerHTML = `
+      <div class="card-bd">
+        <div class="empty"><div class="e-icon">🔍</div><p>查無資料<br>請確認保單號碼或客戶姓名</p></div>
+      </div>
+    `;
+    resultEl.style.display = 'block';
+    state.selectedPolicy = null;
+  }
+}
+
+function goToDocSelect() {
+  if (!state.selectedPolicy) return;
+  showView('view-docselect');
+}
+
+// ============================================================
+// STEP 2: 문서 선택
+// ============================================================
+function selectDoc(type) {
+  state.selectedDocType = type;
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('doc-' + type).classList.add('selected');
+  checkDocReady();
+}
+
+function selectInsurer(el) {
+  document.querySelectorAll('.insurer-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedInsurer = el.dataset.val;
+  checkDocReady();
+}
+
+function checkDocReady() {
+  document.getElementById('btnDocNext').disabled = !(state.selectedDocType && state.selectedInsurer);
+}
+
+function toggleConfig() {
+  const panel = document.getElementById('configPanel');
+  const arrow = document.getElementById('configArrow');
+  panel.classList.toggle('open');
+  arrow.textContent = panel.classList.contains('open') ? '▲ 收合' : '▼ 展開';
+}
+
+function goToSignMode() {
+  if (!state.selectedDocType || !state.selectedInsurer) return;
+  renderSummary();
+  showView('view-signmode');
+}
+
+function renderSummary() {
+  const p = state.selectedPolicy;
+  const c = p.customer;
+  const v = p.vehicle;
+  document.getElementById('summaryGrid').innerHTML = `
+    <div class="info-item"><div class="lbl">客戶</div><div class="val">${c.name}</div></div>
+    <div class="info-item"><div class="lbl">保單</div><div class="val">${p.policy_id}</div></div>
+    <div class="info-item"><div class="lbl">文件</div><div class="val" style="color:var(--red);">${state.selectedDocType === 'new' ? '新保要保書' : '續保要保書'}</div></div>
+    <div class="info-item"><div class="lbl">保險公司</div><div class="val">${state.selectedInsurer}</div></div>
+    <div class="info-item"><div class="lbl">車牌</div><div class="val">${v.plate}</div></div>
+    <div class="info-item"><div class="lbl">保費</div><div class="val">NT$ ${p.premium.toLocaleString()}</div></div>
+  `;
+}
+
+// ============================================================
+// STEP 3A: 대면 서명 (eformsign embed)
+// ============================================================
+function startLocalSign() {
+  const companyId  = document.getElementById('cfgCompanyId').value.trim();
+  const templateId = document.getElementById('cfgTemplateId').value.trim();
+  const langCode   = document.getElementById('cfgLang').value.trim();
+
+  showEformsignView();
+
+  if (companyId && templateId) {
+    embedEformsign(companyId, templateId, langCode);
+  } else {
+    showEfsDemoMode();
+  }
+}
+
+function showEformsignView() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const efsView = document.getElementById('eformsign-view');
+  efsView.classList.add('active');
+  efsView.style.display = 'flex';
+  document.getElementById('stepBar').classList.remove('visible');
+  document.getElementById('hdrBack').classList.add('visible');
+  document.getElementById('fab').style.display = 'none';
+
+  // placeholder 초기화
+  document.getElementById('efsPlaceholder').style.display = 'flex';
+  document.getElementById('efsContainer').style.display = 'none';
+  document.getElementById('efsSpinner').style.display = 'block';
+  document.getElementById('efsHint').style.display = 'none';
+  document.getElementById('efsBtns').style.display = 'none';
+
+  const p = state.selectedPolicy;
+  document.getElementById('efsTitle').textContent =
+    (state.selectedDocType === 'new' ? '新保要保書' : '續保要保書') + ' · ' + p.customer.name;
+  document.getElementById('efsSubtitle').textContent = '正在載入 eformsign 簽署畫面...';
+}
+
+function embedEformsign(companyId, templateId, langCode) {
+  const p = state.selectedPolicy;
+  const c = p.customer;
+  const v = p.vehicle;
+  const today = new Date().toISOString().split('T')[0];
+  const docLabel = state.selectedDocType === 'new' ? '新保要保書' : '續保要保書';
+
+  const document_option = {
+    company: { id: companyId, country_code: 'tw' },
+    mode:    { type: '01', template_id: templateId },
+    user:    { type: '02', external_user_info: { name: c.name } },
+    layout:  { lang_code: langCode || 'zh-TW', header: true, footer: true },
+    prefill_data: {
+      document_name: `${docLabel}_${c.name}_${p.policy_id}_${today}`,
+      fields: [
+        { id: 'policy_number',    value: p.policy_id,                          enabled: false },
+        { id: 'policy_type',      value: state.selectedDocType === 'new' ? '新保' : '續保', enabled: false },
+        { id: 'customer_name',    value: c.name,                               enabled: false },
+        { id: 'customer_name_en', value: c.name_en,                            enabled: false },
+        { id: 'customer_id',      value: c.id_number,                          enabled: false },
+        { id: 'customer_birth',   value: c.birth_date,                         enabled: false },
+        { id: 'customer_phone',   value: c.phone,                              enabled: true  },
+        { id: 'customer_email',   value: c.email,                              enabled: true  },
+        { id: 'vehicle_plate',    value: v.plate,                              enabled: false },
+        { id: 'vehicle_make',     value: v.make,                               enabled: false },
+        { id: 'vehicle_model',    value: v.model,                              enabled: false },
+        { id: 'vehicle_year',     value: String(v.year),                       enabled: false },
+        { id: 'insurer',          value: state.selectedInsurer,                enabled: false },
+        { id: 'premium',          value: String(p.premium),                    enabled: false },
+        { id: 'coverage_start',   value: p.coverage_start,                     enabled: false },
+        { id: 'coverage_end',     value: p.coverage_end,                       enabled: false },
+        { id: 'agent_name',       value: state.agent.name,                     enabled: false },
+        { id: 'agent_code',       value: state.agent.id,                       enabled: false },
+        { id: 'sign_date',        value: today,                                enabled: false },
+      ]
+    }
+  };
+
+  try {
+    const eformsign = new EformSignDocument();
+    const iframeId = 'eformsign_iframe';
+    const container = document.getElementById('efsContainer');
+    container.innerHTML = `<iframe id="${iframeId}" name="${iframeId}" style="width:100%;height:100%;border:none;"></iframe>`;
+
+    const successCallback = (response) => {
+      console.log('eformsign success:', response);
+      document.getElementById('efsSubtitle').textContent = '簽署進行中，請完成客戶簽名';
+      if (response.code === '-1' || response.code === -1) {
+        handleSignComplete(response);
+      }
+    };
+
+    const errorCallback = (response) => {
+      console.error('eformsign error:', response);
+      showEfsDemoMode('eformsign 載入失敗 - 可能是 referrer/origin 權限設定 문제');
+    };
+
+    const actionCallback = (response) => {
+      console.log('eformsign action:', response);
+      document.getElementById('efsSubtitle').textContent = '請客戶在下方完成簽署';
+      document.getElementById('efsSpinner').style.display = 'none';
+      document.getElementById('efsPlaceholder').style.display = 'none';
+      document.getElementById('efsContainer').style.display = 'block';
+      document.getElementById('efsBtns').style.display = 'none';
+    };
+
+    eformsign.document(document_option, iframeId, successCallback, errorCallback, actionCallback);
+    eformsign.open();
+
+  } catch (err) {
+    console.warn('eformsign init error:', err);
+    showEfsDemoMode();
+  }
+}
+
+function showEfsDemoMode(msg) {
+  const p = state.selectedPolicy;
+  const c = p.customer;
+  const v = p.vehicle;
+  document.getElementById('efsSpinner').style.display = 'none';
+  document.getElementById('efsSubtitle').textContent = msg || '(Demo 模式 - 需要有效的 Template ID)';
+
+  const hint = document.getElementById('efsHint');
+  hint.style.display = 'block';
+  hint.innerHTML =
+    `점검 포인트:\n` +
+    `  1) eformsign 허용 origin 에 현재 접속 주소가 등록돼 있는지 확인\n` +
+    `  2) 서식/회사 ID 가 실제 서비스 리전과 일치하는지 확인\n` +
+    `  3) 템플릿 권한과 게시 상태가 유효한지 확인\n\n` +
+    `prefill 資料預覽:\n` +
+    `  客戶：${c.name} (${c.name_en})\n` +
+    `  保單：${p.policy_id}\n` +
+    `  車牌：${v.plate} · ${v.make} ${v.model}\n` +
+    `  保費：NT$ ${p.premium.toLocaleString()}\n` +
+    `  保障：${p.coverage_start} ~ ${p.coverage_end}\n` +
+    `  業務：${state.agent.name} (${state.agent.id})`;
+
+  document.getElementById('efsBtns').style.display = 'flex';
+}
+
+function simulateSign() {
+  handleSignComplete({
+    code: '-1',
+    document_id: 'DEMO-' + Date.now(),
+    title: (state.selectedDocType === 'new' ? '新保要保書' : '續保要保書') + '_' + state.selectedPolicy.customer.name,
+  });
+}
+
+function exitEformsign() {
+  document.getElementById('eformsign-view').classList.remove('active');
+  document.getElementById('eformsign-view').style.display = 'none';
+  showView('view-signmode', false);
+  document.getElementById('stepBar').classList.add('visible');
+  updateStepBar('view-signmode');
+}
+
+function handleSignComplete(response) {
+  document.getElementById('eformsign-view').classList.remove('active');
+  document.getElementById('eformsign-view').style.display = 'none';
+  document.getElementById('stepBar').classList.remove('visible');
+  document.getElementById('hdrBack').classList.remove('visible');
+
+  state.completedDocs++;
+  document.getElementById('statDone').textContent = 12 + state.completedDocs;
+
+  const p  = state.selectedPolicy;
+  const now = new Date();
+
+  document.getElementById('modalInfo').innerHTML = `
+    <div class="modal-row"><span class="mk">客戶</span><span class="mv">${p.customer.name}</span></div>
+    <div class="modal-row"><span class="mk">文件</span><span class="mv">${state.selectedDocType === 'new' ? '新保要保書' : '續保要保書'}</span></div>
+    <div class="modal-row"><span class="mk">保險公司</span><span class="mv">${state.selectedInsurer}</span></div>
+    <div class="modal-row"><span class="mk">文件 ID</span><span class="mv" style="font-family:'DM Mono';font-size:11px;">${response.document_id}</span></div>
+    <div class="modal-row"><span class="mk">完成時間</span><span class="mv">${now.toLocaleString('zh-TW')}</span></div>
+  `;
+  document.getElementById('completeModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('completeModal').classList.remove('active');
+  showView('view-dashboard', false);
+  viewHistory.length = 0;
+}
+
+// ============================================================
+// STEP 3B: 원격 서명 링크
+// ============================================================
+async function startRemoteSign() {
+  showView('view-remote');
+  document.getElementById('remoteLoading').style.display = 'block';
+  document.getElementById('remoteLinkContent').style.display = 'none';
+
+  const p = state.selectedPolicy;
+  const docLabel = state.selectedDocType === 'new' ? '新保要保書' : '續保要保書';
+
+  try {
+    const res = await fetch('/api/remote-sign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        policy: p,
+        customer: p.customer,
+        vehicle: p.vehicle,
+        documentType: state.selectedDocType,
+      }),
+    });
+    const data = await res.json();
+
+    document.getElementById('remoteLoading').style.display = 'none';
+    document.getElementById('remoteLinkContent').style.display = 'block';
+    document.getElementById('remoteDocName').textContent = `${docLabel} · ${p.customer.name}`;
+    document.getElementById('remoteUrl').textContent = data.signing_url;
+    state.signingUrl = data.signing_url;
+
+    if (data.mock) {
+      document.getElementById('remoteUrl').style.color = 'var(--orange)';
+    }
+
+  } catch (err) {
+    document.getElementById('remoteLoading').style.display = 'none';
+    document.getElementById('remoteLinkContent').style.display = 'block';
+    const mockUrl = `https://sg.eformsign.com/sign/demo-${Date.now()}`;
+    document.getElementById('remoteUrl').textContent = mockUrl;
+    document.getElementById('remoteUrl').style.color = 'var(--orange)';
+    state.signingUrl = mockUrl;
+  }
+}
+
+function copyLink() {
+  const url = state.signingUrl || document.getElementById('remoteUrl').textContent;
+  navigator.clipboard?.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ 已複製';
+    setTimeout(() => { btn.textContent = '📋 複製連結'; }, 2000);
+  });
+}
+
+// ============================================================
+// LANGUAGE TOGGLE
+// ============================================================
+let currentLang = 'zh';
+
+const TRANSLATIONS = {
+  // Header
+  'hdrAppName':      { zh: '六合國際電子要保書', en: 'Liu Ho eSign System' },
+  'hdrAppSub':       { zh: 'Liu Ho eSign System', en: 'Digital Insurance Platform' },
+  'hdrBack':         { zh: '← 返回', en: '← Back' },
+  // Dashboard labels
+  'statLabelPending':{ zh: '待簽署', en: 'Pending' },
+  'statLabelDone':   { zh: '今日完成', en: "Today's Done" },
+  'statLabelRenewal':{ zh: '續保提醒', en: 'Renewals' },
+  'dashRenewalTitle':{ zh: '續保提醒', en: 'Renewal Alerts' },
+  'dashRenewalSub':  { zh: '即將到期的保單', en: 'Policies expiring soon' },
+  'dashPendingTitle':{ zh: '待簽署清單', en: 'Pending Signatures' },
+  'dashPendingSub':  { zh: '遠端簽署進度追蹤', en: 'Remote signing progress' },
+  'dashWebhookTitle':{ zh: '簽署完成記錄', en: 'Completed Records' },
+  'dashWebhookSub':  { zh: 'Webhook 即時接收', en: 'Real-time webhook events' },
+  'dashEmptyMsg':    { zh: '尚無完成記錄<br>完成簽署後將即時顯示', en: 'No records yet<br>Completed signings will appear here' },
+  'fabTitle':        { zh: '＋', en: '＋' },
+  // Alert items
+  'alert1Name':      { zh: '王小明', en: 'Wang Xiao-Ming' },
+  'alert1Detail':    { zh: 'ABC-1234 · 新光火災', en: 'ABC-1234 · Shin Kong Insurance' },
+  'alert2Name':      { zh: '李美玲', en: 'Li Mei-Ling' },
+  'alert2Detail':    { zh: 'XYZ-5678 · 明台產險', en: 'XYZ-5678 · Ming Tai Insurance' },
+  // Pending items
+  'pending1Name':    { zh: '陳大華 · 新保要保書', en: 'Chen Da-Hua · New Policy Form' },
+  'pending1Meta':    { zh: '新光火災 · 已發送 Line', en: 'Shin Kong · Sent via Line' },
+  'pending1Time':    { zh: '3小時前', en: '3 hrs ago' },
+  'pending2Name':    { zh: '林翠芬 · 續保要保書', en: 'Lin Tsui-Fen · Renewal Form' },
+  'pending2Meta':    { zh: '富邦產險 · 已發送 Email', en: 'Fubon Insurance · Sent via Email' },
+  'pending2Time':    { zh: '昨天', en: 'Yesterday' },
+  // Step bar
+  'step1Label':      { zh: '查詢', en: 'Search' },
+  'step2Label':      { zh: '文件', en: 'Document' },
+  'step3Label':      { zh: '簽署', en: 'Sign' },
+  'step4Label':      { zh: '完成', en: 'Done' },
+  // Search view
+  'searchSectionLabel':{ zh: '步驟 1 · 客戶查詢', en: 'Step 1 · Customer Search' },
+  'searchCardTitle': { zh: '查詢客戶資料', en: 'Look Up Customer' },
+  'searchCardSub':   { zh: '輸入保單號碼或客戶姓名', en: 'Enter policy number or customer name' },
+  'searchPlaceholder':{ zh: 'P-2024-08821 / 陳大華', en: 'P-2024-08821 / Chen Da-Hua' },
+  'searchBtn':       { zh: '查詢', en: 'Search' },
+  'searchHint':      { zh: 'Demo: P-2024-08821 · P-2025-03341 · P-2025-07789', en: 'Demo: P-2024-08821 · P-2025-03341 · P-2025-07789' },
+  'searchResultLabel':{ zh: '查詢結果', en: 'Search Result' },
+  'searchNextBtn':   { zh: '下一步 · 選擇文件 →', en: 'Next · Select Document →' },
+  // Doc select
+  'docSectionLabel': { zh: '步驟 2 · 選擇要保書', en: 'Step 2 · Select Form' },
+  'docTypeTitle':    { zh: '要保書類型', en: 'Form Type' },
+  'docNewTitle':     { zh: '新保要保書', en: 'New Policy Form' },
+  'docNewSub':       { zh: '保險公司報價 → 轉換為六合要保書', en: "Insurer's quote → converted to Liu Ho form" },
+  'docRenewalTitle': { zh: '續保要保書', en: 'Renewal Form' },
+  'docRenewalSub':   { zh: '系統自動帶入現有保單資料', en: 'Auto-populated from existing policy data' },
+  'insurerTitle':    { zh: '保險公司', en: 'Insurer' },
+  'configTitle':     { zh: '⚙️ eformsign API 設定', en: '⚙️ eformsign API Settings' },
+  'configOpen':      { zh: '▼ 展開', en: '▼ Expand' },
+  'configClose':     { zh: '▲ 收合', en: '▲ Collapse' },
+  'docNextBtn':      { zh: '下一步 · 選擇簽署方式 →', en: 'Next · Choose Signing Method →' },
+  // Sign mode
+  'signSectionLabel':{ zh: '步驟 3 · 簽署方式', en: 'Step 3 · Signing Method' },
+  'localModeTitle':  { zh: '現場簽署', en: 'On-Site Signing' },
+  'localModeSub':    { zh: 'Face-to-Face Signing', en: 'Face-to-Face Signing' },
+  'localModeDesc':   { zh: '業務員與客戶面對面<br>客戶直接在此裝置上親簽', en: 'Agent meets customer in person<br>Customer signs directly on this device' },
+  'localModeBtn':    { zh: '立即現場簽署', en: 'Start On-Site Signing' },
+  'remoteModeTitle': { zh: '遠端簽署', en: 'Remote Signing' },
+  'remoteModeSub':   { zh: 'Remote Link Signing', en: 'Remote Link Signing' },
+  'remoteModeDesc':  { zh: '產生簽署連結<br>透過 Line / SMS / Email 發送給客戶', en: 'Generate a signing link<br>Share via Line / SMS / Email' },
+  'remoteModeBtn':   { zh: '產生簽署連結', en: 'Generate Signing Link' },
+  // Remote view
+  'remoteSectionLabel':{ zh: '步驟 3 · 遠端簽署連結', en: 'Step 3 · Remote Signing Link' },
+  'remoteLoadingMsg':{ zh: '正在產生簽署連結...', en: 'Generating signing link...' },
+  'remoteLinkTitle': { zh: '簽署連結已產生', en: 'Signing Link Generated' },
+  'remoteCopyBtn':   { zh: '📋 複製連結', en: '📋 Copy Link' },
+  'remoteCopied':    { zh: '✓ 已複製', en: '✓ Copied' },
+  'remoteSendLabel': { zh: '發送方式', en: 'Send Via' },
+  'remoteWaiting':   { zh: '等待客戶簽署中...', en: 'Waiting for customer to sign...' },
+  'remoteWaitingSub':{ zh: '簽署完成後將自動通知', en: 'You will be notified when complete' },
+  'remoteAuthTitle': { zh: '身份驗證設定', en: 'Identity Verification' },
+  'remoteAuthSub':   { zh: '由 eformsign 管理', en: 'Managed by eformsign' },
+  'remoteAuth1':     { zh: 'Email OTP 驗證 (eformsign 內建)', en: 'Email OTP verification (built-in)' },
+  'remoteAuth2':     { zh: 'IP / 裝置 / 時間戳記錄', en: 'IP / Device / Timestamp logging' },
+  'remoteAuth3':     { zh: '稽核追蹤憑證自動產生', en: 'Audit trail certificate auto-generated' },
+  'remoteDashBtn':   { zh: '← 返回儀表板', en: '← Back to Dashboard' },
+  // Modal
+  'modalTitle':      { zh: '簽署完成！', en: 'Signing Complete!' },
+  'modalSub':        { zh: '要保書已成功完成電子簽署', en: 'Insurance form signed successfully' },
+  'modalCloseBtn':   { zh: '返回儀表板', en: 'Back to Dashboard' },
+  // eformsign view
+  'efsLoading':      { zh: '正在載入 eformsign 簽署畫面...', en: 'Loading eformsign signing screen...' },
+  'efsDemoLabel':    { zh: '(Demo 模式 - 需要有效的 Template ID)', en: '(Demo mode - valid Template ID required)' },
+  'efsSimBtn':       { zh: '✓ 模擬完成簽署 (Demo)', en: '✓ Simulate Signing Complete (Demo)' },
+  'efsBackBtn':      { zh: '← 返回', en: '← Back' },
+  // Customer card labels
+  'lbl_id_number':   { zh: '身分證號', en: 'ID Number' },
+  'lbl_birth_date':  { zh: '生年月日', en: 'Date of Birth' },
+  'lbl_phone':       { zh: '聯絡電話', en: 'Phone' },
+  'lbl_email':       { zh: 'Email', en: 'Email' },
+  'lbl_plate':       { zh: '車牌號碼', en: 'Plate Number' },
+  'lbl_vehicle':     { zh: '車輛', en: 'Vehicle' },
+  'lbl_type':        { zh: '保單類型', en: 'Policy Type' },
+  'lbl_insurer':     { zh: '保險公司', en: 'Insurer' },
+  // Summary grid labels
+  'lbl_customer':    { zh: '客戶', en: 'Customer' },
+  'lbl_policy':      { zh: '保單', en: 'Policy' },
+  'lbl_document':    { zh: '文件', en: 'Document' },
+  'lbl_insurer2':    { zh: '保險公司', en: 'Insurer' },
+  'lbl_plate2':      { zh: '車牌', en: 'Plate' },
+  'lbl_premium':     { zh: '保費', en: 'Premium' },
+  // Modal info labels
+  'mk_customer':     { zh: '客戶', en: 'Customer' },
+  'mk_document':     { zh: '文件', en: 'Document' },
+  'mk_insurer':      { zh: '保險公司', en: 'Insurer' },
+  'mk_docid':        { zh: '文件 ID', en: 'Document ID' },
+  'mk_time':         { zh: '完成時間', en: 'Completed At' },
+  // Insurer names
+  'insurer_xg':      { zh: '新光火災', en: 'Shin Kong' },
+  'insurer_fb':      { zh: '富邦產險', en: 'Fubon' },
+  'insurer_gt':      { zh: '國泰世紀', en: 'Cathay' },
+  'insurer_mt':      { zh: '明台產險', en: 'Ming Tai' },
+  // Webhook log
+  'wh_docname':      { zh: '文件名稱', en: 'Document Name' },
+  'wh_signer':       { zh: '簽署人', en: 'Signer' },
+  'wh_docid':        { zh: '文件 ID', en: 'Document ID' },
+  'wh_received':     { zh: '接收時間', en: 'Received At' },
+  'wh_archive_ok':   { zh: '核心系統歸檔完成', en: 'Core System Archived' },
+  'wh_archive_ing':  { zh: '核心系統歸檔中...', en: 'Archiving to core system...' },
+};
+
+function t(key) {
+  const entry = TRANSLATIONS[key];
+  if (!entry) return key;
+  return entry[currentLang] || entry['zh'];
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  const btn = document.getElementById('langToggle');
+  btn.textContent = currentLang === 'zh' ? 'EN' : '中';
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const lang = currentLang;
+
+  // Header
+  setTxtId('hdrAppNameEl', t('hdrAppName'));
+  setTxtId('hdrAppSubEl', t('hdrAppSub'));
+  document.getElementById('hdrBack').textContent = t('hdrBack');
+
+  // Step bar
+  setTxt('#step1 span', t('step1Label'));
+  setTxt('#step2 span', t('step2Label'));
+  setTxt('#step3 span', t('step3Label'));
+  setTxt('#step4 span', t('step4Label'));
+
+  // Stats
+  setTxtId('statLabelPendingEl', t('statLabelPending'));
+  setTxtId('statLabelDoneEl', t('statLabelDone'));
+  setTxtId('statLabelRenewalEl', t('statLabelRenewal'));
+
+  // Dashboard cards
+  applyCardHeader('dashRenewalTitle', 'dashRenewalSub');
+  applyCardHeader('dashPendingTitle', 'dashPendingSub');
+  applyCardHeader('dashWebhookTitle', 'dashWebhookSub');
+
+  // Alert items
+  setTxtId('alert1Name', t('alert1Name'));
+  setTxtId('alert1Detail', t('alert1Detail'));
+  setTxtId('alert2Name', t('alert2Name'));
+  setTxtId('alert2Detail', t('alert2Detail'));
+
+  // Pending items
+  setTxtId('pending1Name', t('pending1Name'));
+  setTxtId('pending1Meta', t('pending1Meta'));
+  setTxtId('pending1Time', t('pending1Time'));
+  setTxtId('pending2Name', t('pending2Name'));
+  setTxtId('pending2Meta', t('pending2Meta'));
+  setTxtId('pending2Time', t('pending2Time'));
+
+  // Search view
+  setTxtId('searchSectionLabel', t('searchSectionLabel'));
+  setTxtId('searchCardTitle', t('searchCardTitle'));
+  setTxtId('searchCardSub', t('searchCardSub'));
+  const inp = document.getElementById('searchInput');
+  if (inp) inp.placeholder = t('searchPlaceholder').zh ?? t('searchPlaceholder');
+  setTxtId('searchBtn', t('searchBtn'));
+  setTxtId('searchHint', t('searchHint'));
+  setTxtId('searchResultLabel', t('searchResultLabel'));
+  setTxtId('searchNextBtn', t('searchNextBtn'));
+
+  // Doc select
+  setTxtId('docSectionLabel', t('docSectionLabel'));
+  setTxtId('docTypeTitle', t('docTypeTitle'));
+  setTxtId('docNewTitle', t('docNewTitle'));
+  setTxtId('docNewSub', t('docNewSub'));
+  setTxtId('docRenewalTitle', t('docRenewalTitle'));
+  setTxtId('docRenewalSub', t('docRenewalSub'));
+  setTxtId('insurerTitle', t('insurerTitle'));
+  setTxtId('configTitle', t('configTitle'));
+  const panel = document.getElementById('configPanel');
+  const arrow = document.getElementById('configArrow');
+  if (arrow) arrow.textContent = panel?.classList.contains('open') ? t('configClose') : t('configOpen');
+  setTxtId('docNextBtn', t('docNextBtn'));
+
+  // Insurer chips
+  const chips = document.querySelectorAll('.insurer-chip');
+  const insurerMap = { '新光火災': t('insurer_xg'), '富邦產險': t('insurer_fb'), '國泰世紀': t('insurer_gt'), '明台產險': t('insurer_mt') };
+  chips.forEach(chip => {
+    const v = chip.dataset.val;
+    chip.textContent = lang === 'en' ? (insurerMap[v] || v) : v;
+  });
+
+  // Sign mode
+  setTxtId('signSectionLabel', t('signSectionLabel'));
+  setTxtId('localModeTitle', t('localModeTitle'));
+  setTxtId('localModeSub', t('localModeSub'));
+  setInnerHTML('localModeDesc', t('localModeDesc'));
+  setTxtId('localModeBtn', t('localModeBtn'));
+  setTxtId('remoteModeTitle', t('remoteModeTitle'));
+  setTxtId('remoteModeSub', t('remoteModeSub'));
+  setInnerHTML('remoteModeDesc', t('remoteModeDesc'));
+  setTxtId('remoteModeBtn', t('remoteModeBtn'));
+
+  // Remote view
+  setTxtId('remoteSectionLabel', t('remoteSectionLabel'));
+  setInnerHTML('remoteLoadingMsg', t('remoteLoadingMsg'));
+  setTxtId('remoteSendLabel', t('remoteSendLabel'));
+  setTxtId('remoteCopyBtnEl', t('remoteCopyBtn'));
+  setInnerHTML('remoteWaitingText', t('remoteWaiting'));
+  setInnerHTML('remoteWaitingSub', t('remoteWaitingSub'));
+  setTxtId('remoteAuthTitle', t('remoteAuthTitle'));
+  setTxtId('remoteAuthSub', t('remoteAuthSub'));
+  setTxtId('remoteAuth1', t('remoteAuth1'));
+  setTxtId('remoteAuth2', t('remoteAuth2'));
+  setTxtId('remoteAuth3', t('remoteAuth3'));
+  setTxtId('remoteDashBtn', t('remoteDashBtn'));
+
+  // Modal
+  setTxtId('modalTitle', t('modalTitle'));
+  setTxtId('modalSub', t('modalSub'));
+  setTxtId('modalCloseBtn', t('modalCloseBtn'));
+
+  // eformsign view
+  setTxtId('efsBackBtn', t('efsBackBtn'));
+  setTxtId('efsSimBtn', t('efsSimBtn'));
+
+  // Webhook empty state
+  const empty = document.querySelector('#webhookLog .empty p');
+  if (empty) empty.innerHTML = t('dashEmptyMsg');
+}
+
+function setTxt(selector, val) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = val;
+}
+function setTxtId(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setInnerHTML(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = val;
+}
+function applyCardHeader(titleKey, subKey) {
+  // no-op for dynamic elements; those are rendered per renderWebhookEntry
+}
+
+function shareVia(method) {
+  const url = state.signingUrl || '';
+  const p   = state.selectedPolicy;
+  const msg = `六合國際要保書簽署請求\n客戶：${p.customer.name}\n請點擊連結完成簽署：\n${url}`;
+
+  if (method === 'line') {
+    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
+  } else if (method === 'sms') {
+    window.open(`sms:${p.customer.phone}?body=${encodeURIComponent(msg)}`);
+  } else if (method === 'email') {
+    window.open(`mailto:${p.customer.email}?subject=${encodeURIComponent('要保書電子簽署請求')}&body=${encodeURIComponent(msg)}`);
+  }
+}
+
+// ============================================================
+// SSE: 실시간 웹훅 수신
+// ============================================================
+function initSSE() {
+  const evtSrc = new EventSource('/api/events');
+
+  evtSrc.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+
+    if (data.type === 'init') {
+      data.events.forEach(ev => renderWebhookEntry(ev, false));
+      return;
+    }
+    if (data.type === 'webhook_received') {
+      renderWebhookEntry(data.event, true);
+      showSignComplete(data.event);
+    }
+    if (data.type === 'archive_complete') {
+      updateArchiveStatus(data.event);
+    }
+  };
+
+  evtSrc.onerror = () => {
+    console.log('SSE 연결 대기 중...');
+  };
+}
+
+function renderWebhookEntry(ev, isNew) {
+  const logEl  = document.getElementById('webhookLog');
+  const detailEl = document.getElementById('webhookDetailLog');
+
+  // 빈 상태 제거
+  const empty = logEl.querySelector('.empty');
+  if (empty) empty.remove();
+
+  const html = buildWebhookEntryHtml(ev);
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'wh-' + ev.id;
+  wrapper.innerHTML = html;
+
+  if (isNew) {
+    logEl.insertBefore(wrapper, logEl.firstChild);
+    if (detailEl) detailEl.insertBefore(wrapper.cloneNode(true), detailEl.firstChild);
+
+    // 대기중 건수 업데이트
+    const cur = parseInt(document.getElementById('statPending').textContent) || 0;
+    if (cur > 0) document.getElementById('statPending').textContent = cur - 1;
+    const done = parseInt(document.getElementById('statDone').textContent) || 12;
+    document.getElementById('statDone').textContent = done + 1;
+  } else {
+    logEl.appendChild(wrapper);
+    if (detailEl) {
+      const c = wrapper.cloneNode(true);
+      detailEl.appendChild(c);
+    }
+  }
+}
+
+function buildWebhookEntryHtml(ev) {
+  const archiveClass = ev.archive_status === 'success' ? 'success' : 'pending';
+  const archiveText  = ev.archive_status === 'success'
+    ? `✓ 核心系統歸檔完成 · ${ev.archive_ref}`
+    : '⏳ 核心系統歸檔中...';
+
+  return `
+    <div class="webhook-entry">
+      <span class="wh-type">${ev.event_type || 'document_completed'}</span>
+      <div class="wh-row"><span class="wh-label">文件名稱</span><span class="wh-val">${ev.document_name}</span></div>
+      <div class="wh-row"><span class="wh-label">簽署人</span><span class="wh-val">${ev.signer_name}</span></div>
+      <div class="wh-row"><span class="wh-label">文件 ID</span><span class="wh-val" style="font-size:10px;">${ev.document_id}</span></div>
+      <div class="wh-row"><span class="wh-label">接收時間</span><span class="wh-val">${new Date(ev.received_at).toLocaleString('zh-TW')}</span></div>
+      <div class="archive-tag ${archiveClass}" id="arch-${ev.id}">${archiveText}</div>
+    </div>
+  `;
+}
+
+function updateArchiveStatus(ev) {
+  const el = document.getElementById('arch-' + ev.id);
+  if (el) {
+    el.className = 'archive-tag success';
+    el.textContent = `✓ 核心系統歸檔完成 · ${ev.archive_ref}`;
+  }
+}
+
+function showSignComplete(ev) {
+  // 원격 서명 대기 중이라면 상태 업데이트
+  const ws = document.getElementById('waitingStatus');
+  if (ws && currentView === 'view-remote') {
+    ws.style.background = 'var(--green-faint)';
+    ws.style.borderColor = 'var(--green)';
+    ws.querySelector('.waiting-pulse').style.background = 'var(--green)';
+    ws.innerHTML = `
+      <div style="font-size:22px;">✅</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);">客戶已完成簽署！</div>
+        <div style="font-size:11px;color:var(--ink-mid);">${ev.signer_name} · ${new Date(ev.received_at).toLocaleTimeString('zh-TW')}</div>
+      </div>
+    `;
+  }
+}
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initSSE();
+  applyTranslations();
+
+  // Add click handlers for pending items
+  document.querySelectorAll('.pending-item').forEach((item, index) => {
+    item.addEventListener('click', () => handlePendingItemClick(index));
+    item.style.cursor = 'pointer'; // Add cursor pointer to indicate clickable
+  });
+});
+
+function handlePendingItemClick(index) {
+  if (index === 0) {
+    // Chen Da-Hua · New Policy Form
+    const customer = {
+      name: '陳大華',
+      name_en: 'Chen Da-Hua',
+      id_number: 'A223456789',
+      birth_date: '1985-03-22',
+      phone: '0912-345-678',
+      email: 'chen@gmail.com'
+    };
+
+    // Set customer data and navigate to search view
+    state.customer = customer;
+    showView('view-search');
+
+    // Auto-fill search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.value = 'P-2024-08821';
+      searchCustomer();
+    }
+  } else if (index === 1) {
+    // Lin Cui-Fen · Renewal Policy Form
+    const customer = {
+      name: '林翠芬',
+      name_en: 'Lin Cui-Fen',
+      id_number: 'B198765432',
+      birth_date: '1990-07-15',
+      phone: '0987-654-321',
+      email: 'lin@gmail.com'
+    };
+
+    // Set customer data and navigate to search view
+    state.customer = customer;
+    showView('view-search');
+
+    // Auto-fill search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.value = 'P-2025-03341';
+      searchCustomer();
+    }
+  }
+}
+</script>
+</body>
+</html>
