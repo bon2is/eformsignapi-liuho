@@ -1136,7 +1136,7 @@ function showEformsignView() {
   document.getElementById('efsSubtitle').textContent = '正在載入 eformsign 簽署畫面...';
 }
 
-async function embedEformsign(companyId, templateId, langCode) {
+function embedEformsign(companyId, templateId, langCode) {
   const p = state.selectedPolicy;
   const c = p.customer;
   const v = p.vehicle;
@@ -1148,7 +1148,7 @@ async function embedEformsign(companyId, templateId, langCode) {
     mode:    { type: '01', template_id: templateId },
     user:    { type: '02', external_user_info: { name: c.name } },
     layout:  { lang_code: langCode || 'zh-TW', header: true, footer: true },
-    prefill_data: {
+    prefill: {
       document_name: `${docLabel}_${c.name}_${p.policy_id}_${today}`,
       fields: [
         { id: 'policy_number',    value: p.policy_id,                          enabled: false },
@@ -1173,20 +1173,6 @@ async function embedEformsign(companyId, templateId, langCode) {
       ]
     }
   };
-
-  // SDK의 getTokenInfo postMessage에 응답하려면 localStorage에 access_token이 있어야 함
-  try {
-    const tokenRes = await fetch('/api/token', { method: 'POST' });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) {
-      showEfsDemoMode('認證失敗 - 請確認 eformsign API 設定');
-      return;
-    }
-    localStorage.setItem('access_token', encodeURIComponent(tokenData.access_token));
-  } catch (err) {
-    showEfsDemoMode(`認證網路錯誤: ${err.message}`);
-    return;
-  }
 
   try {
     const eformsign = new EformSignDocument();
