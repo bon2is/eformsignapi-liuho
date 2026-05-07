@@ -208,6 +208,45 @@ function buildPrefillFields(policy, customer, vehicle, documentType, today) {
 }
 
 // ============================================================
+// TOKEN: eformsign HMAC OAuth 토큰 취득 (임베드 SDK용)
+// iframe이 postMessage로 access_token을 요청하므로 localStorage에 미리 저장
+// ============================================================
+app.post('/api/token', async (_req, res) => {
+  const apiKey = process.env.EFORMSIGN_API_KEY;
+  const serverUrl = process.env.EFORMSIGN_SERVER_URL;
+
+  if (!apiKey || !serverUrl) {
+    return res.status(500).json({ error: 'eformsign 환경변수 미설정' });
+  }
+
+  const executionTime = Date.now();
+  const hmac = crypto.createHmac('sha256', apiKey);
+  hmac.update(String(executionTime));
+  const eformsignSignature = `${executionTime}.${hmac.digest('base64')}`;
+
+  try {
+    const tokenRes = await fetch(`${serverUrl}/api/v2.0/oauth/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'eformsign_signature': eformsignSignature,
+      },
+      body: JSON.stringify({ execution_time: executionTime }),
+    });
+
+    const tokenData = await tokenRes.json();
+
+    if (tokenData.access_token) {
+      return res.json({ access_token: tokenData.access_token });
+    }
+
+    return res.status(500).json({ error: 'access_token 획득 실패', detail: tokenData });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
 // WEBHOOK TEST: curl용 테스트 엔드포인트
 // ============================================================
 app.post('/api/webhook/test', (req, res) => {
