@@ -224,6 +224,9 @@ app.post('/api/token', async (_req, res) => {
   hmac.update(String(executionTime));
   const eformsignSignature = `${executionTime}.${hmac.digest('base64')}`;
 
+  const memberId = process.env.EFORMSIGN_MEMBER_ID;
+  const isPlaceholder = !memberId || memberId === 'your_account_email@example.com';
+
   try {
     const tokenRes = await fetch(`${serverUrl}/api/v2.0/oauth/token`, {
       method: 'POST',
@@ -232,18 +235,33 @@ app.post('/api/token', async (_req, res) => {
         'eformsign_signature': eformsignSignature,
       },
       body: JSON.stringify({
-      execution_time: executionTime,
-      ...(process.env.EFORMSIGN_MEMBER_ID && { member_id: process.env.EFORMSIGN_MEMBER_ID }),
-    }),
+        execution_time: executionTime,
+        ...(!isPlaceholder && { member_id: memberId }),
+      }),
     });
 
-    const tokenData = await tokenRes.json();
+    const rawText = await tokenRes.text();
+
+    let tokenData;
+    try {
+      tokenData = JSON.parse(rawText);
+    } catch (_) {
+      return res.status(500).json({
+        error: 'eformsign 응답 파싱 실패',
+        http_status: tokenRes.status,
+        raw: rawText.slice(0, 500),
+      });
+    }
 
     if (tokenData.access_token) {
       return res.json({ access_token: tokenData.access_token });
     }
 
-    return res.status(500).json({ error: 'access_token 획득 실패', detail: tokenData });
+    return res.status(500).json({
+      error: 'access_token 획득 실패',
+      http_status: tokenRes.status,
+      detail: tokenData,
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
